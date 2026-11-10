@@ -50,5 +50,6 @@ def make_dataset(total=5000, fraud_share=0.05):
 
 if __name__ == "__main__":
     df = make_dataset()
-    print(df.head())
+    df.to_csv("data/transactions.csv", index=False)
+    print("saved", len(df), "rows to data/transactions.csv")
     print(df["is_fraud"].value_counts())
