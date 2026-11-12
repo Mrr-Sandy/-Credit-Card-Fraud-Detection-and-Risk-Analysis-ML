@@ -8,7 +8,15 @@ def add_amount_ratio(df):
     return df
 
 
+def add_night_flag(df):
+    # transactions between 11 PM and 5 AM are treated as unusual hours
+    df = df.copy()
+    df["is_night"] = ((df["hour"] >= 23) | (df["hour"] <= 4)).astype(int)
+    return df
+
+
 if __name__ == "__main__":
     data = pd.read_csv("data/transactions.csv")
     data = add_amount_ratio(data)
-    print(data.groupby("is_fraud")["amount_ratio"].mean())
+    data = add_night_flag(data)
+    print(data.groupby("is_fraud")[["amount_ratio", "is_night"]].mean())
