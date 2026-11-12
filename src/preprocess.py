@@ -52,3 +52,9 @@ if __name__ == "__main__":
     train = oversample_fraud(train)
     print("after: ", train["is_fraud"].value_counts().to_dict())
     print("test unchanged:", test["is_fraud"].value_counts().to_dict())
+
+    # save so the model training step can load these directly
+    train.to_csv("data/train.csv", index=False)
+    test.to_csv("data/test.csv", index=False)
+    pd.DataFrame({"mean": mean, "std": std}).to_csv("models/scaler_values.csv")
+    print("saved data/train.csv, data/test.csv, models/scaler_values.csv")
