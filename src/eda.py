@@ -37,7 +37,29 @@ def plot_amount():
     plt.close()
 
 
+def plot_hour_and_frequency():
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+    # share of fraud in each hour of the day
+    fraud_by_hour = df.groupby("hour")["is_fraud"].mean()
+    axes[0].bar(fraud_by_hour.index, fraud_by_hour.values, color="indianred")
+    axes[0].set_xlabel("hour of day")
+    axes[0].set_ylabel("fraud rate")
+    axes[0].set_title("Fraud rate by hour")
+
+    # average number of transactions in the last hour
+    freq = df.groupby("is_fraud")["txn_count_1h"].mean()
+    axes[1].bar(["Normal", "Fraud"], freq.values, color=["steelblue", "indianred"])
+    axes[1].set_ylabel("avg txns in last hour")
+    axes[1].set_title("Transaction frequency")
+
+    plt.tight_layout()
+    plt.savefig("reports/figures/hour_and_frequency.png")
+    plt.close()
+
+
 if __name__ == "__main__":
     plot_class_balance()
     plot_amount()
+    plot_hour_and_frequency()
     print("fraud share: {:.1%}".format(df["is_fraud"].mean()))
