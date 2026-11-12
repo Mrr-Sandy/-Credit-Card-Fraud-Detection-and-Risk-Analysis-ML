@@ -34,10 +34,21 @@ def scale_data(train, test):
     return train, test, mean, std
 
 
+def oversample_fraud(train, seed=42):
+    # repeat fraud rows (with replacement) until both classes have equal size.
+    # only the train set is touched, the test set stays as it is in real life
+    fraud = train[train["is_fraud"] == 1]
+    normal = train[train["is_fraud"] == 0]
+    extra = fraud.sample(n=len(normal) - len(fraud), replace=True, random_state=seed)
+    balanced = pd.concat([normal, fraud, extra])
+    return balanced.sample(frac=1, random_state=seed).reset_index(drop=True)
+
+
 if __name__ == "__main__":
     data = build_features(pd.read_csv("data/transactions.csv"))
     train, test = split_data(data)
     train, test, mean, std = scale_data(train, test)
-    print("train:", train.shape, "fraud:", train["is_fraud"].sum())
-    print("test: ", test.shape, "fraud:", test["is_fraud"].sum())
-    print(train[SCALE_COLS].mean().round(3).to_dict())
+    print("before:", train["is_fraud"].value_counts().to_dict())
+    train = oversample_fraud(train)
+    print("after: ", train["is_fraud"].value_counts().to_dict())
+    print("test unchanged:", test["is_fraud"].value_counts().to_dict())
