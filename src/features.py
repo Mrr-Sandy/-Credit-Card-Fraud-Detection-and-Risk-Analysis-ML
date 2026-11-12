@@ -15,8 +15,19 @@ def add_night_flag(df):
     return df
 
 
+def encode_txn_type(df):
+    # models need numbers, so online/pos/atm becomes three 0/1 columns
+    return pd.get_dummies(df, columns=["txn_type"], prefix="type", dtype=int)
+
+
+def build_features(df):
+    df = add_amount_ratio(df)
+    df = add_night_flag(df)
+    df = encode_txn_type(df)
+    return df
+
+
 if __name__ == "__main__":
-    data = pd.read_csv("data/transactions.csv")
-    data = add_amount_ratio(data)
-    data = add_night_flag(data)
-    print(data.groupby("is_fraud")[["amount_ratio", "is_night"]].mean())
+    data = build_features(pd.read_csv("data/transactions.csv"))
+    print(data.columns.tolist())
+    print(data.head(3))
