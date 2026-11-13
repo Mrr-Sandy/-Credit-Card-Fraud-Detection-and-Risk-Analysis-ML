@@ -32,7 +32,22 @@ def plot_class_distribution(df):
     plt.close()
 
 
+def plot_amount(df):
+    plt.figure(figsize=(6, 4))
+    plt.hist(df[df.is_fraud == 0]["amount"], bins=40, alpha=0.7, label="Normal", color="steelblue")
+    plt.hist(df[df.is_fraud == 1]["amount"], bins=40, alpha=0.7, label="Fraud", color="indianred")
+    plt.yscale("log")
+    plt.xlabel("Amount (Rs)")
+    plt.ylabel("Transactions (log scale)")
+    plt.title("Transaction amount by class")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/amount_by_class_logy.png", dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     df = load_data()
     basic_info(df)
     plot_class_distribution(df)
+    plot_amount(df)
