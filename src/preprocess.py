@@ -1,3 +1,4 @@
+import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -46,3 +47,9 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test, scaler = split_and_scale(df)
     print("train:", X_train.shape, "fraud share:", round(y_train.mean(), 3))
     print("test: ", X_test.shape, "fraud share:", round(y_test.mean(), 3))
+
+    # save processed data and the scaler for the modeling step
+    X_train.assign(is_fraud=y_train).to_csv("data/train.csv", index=False)
+    X_test.assign(is_fraud=y_test).to_csv("data/test.csv", index=False)
+    joblib.dump(scaler, "models/scaler.joblib")
+    print("saved data/train.csv, data/test.csv, models/scaler.joblib")
