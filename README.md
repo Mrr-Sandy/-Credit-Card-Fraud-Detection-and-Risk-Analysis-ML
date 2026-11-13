@@ -71,6 +71,17 @@ jupyter notebook
 
 (`requirements.txt` and notebooks will be added as the project develops.)
 
+## Progress
+
+- **Day 1-2:** project setup, synthetic data generation (`src/generate_data.py`), dataset check.
+- **Day 3:** EDA (`src/eda.py`, plots in `reports/figures/`) and preprocessing (`src/preprocess.py`).
+  - Fraud shows clearly in amount, late-night hours, many transactions in 1 hour and new location.
+  - Added features `amount_ratio` (amount / avg_spending) and `is_night`; `txn_type` is one-hot encoded.
+  - 80/20 stratified split, scaler fitted on train only. Outputs: `data/train.csv`, `data/test.csv`, `models/scaler.joblib`.
+- **Next:** handle imbalance and train models.
+
+Run order: `python src/generate_data.py`, `python src/eda.py`, `python src/preprocess.py`.
+
 ## Results
 
 To be added: model comparison table, confusion matrix and ROC / PR curves.
