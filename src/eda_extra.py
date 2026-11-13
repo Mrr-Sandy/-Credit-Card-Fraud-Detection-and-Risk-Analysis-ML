@@ -46,8 +46,21 @@ def plot_amount(df):
     plt.close()
 
 
+def plot_hour(df):
+    rate = df.groupby("hour")["is_fraud"].mean() * 100
+    plt.figure(figsize=(7, 4))
+    plt.bar(rate.index, rate.values, color="indianred")
+    plt.xlabel("Hour of day")
+    plt.ylabel("Fraud rate (%)")
+    plt.title("Fraud rate by hour")
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/fraud_rate_by_hour.png", dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     df = load_data()
     basic_info(df)
     plot_class_distribution(df)
     plot_amount(df)
+    plot_hour(df)
