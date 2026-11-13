@@ -71,6 +71,34 @@ def plot_behaviour(df):
     plt.close()
 
 
+def plot_txn_type(df):
+    rate = df.groupby("txn_type")["is_fraud"].mean() * 100
+    plt.figure(figsize=(5, 4))
+    plt.bar(rate.index, rate.values, color="indianred")
+    plt.xlabel("Transaction type")
+    plt.ylabel("Fraud rate (%)")
+    plt.title("Fraud rate by transaction type")
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/fraud_rate_by_txn_type.png", dpi=120)
+    plt.close()
+
+
+def plot_correlation(df):
+    corr = df.drop(columns="txn_type").corr()
+    plt.figure(figsize=(6, 5))
+    plt.imshow(corr, cmap="coolwarm", vmin=-1, vmax=1)
+    plt.colorbar()
+    plt.xticks(range(len(corr)), corr.columns, rotation=45, ha="right")
+    plt.yticks(range(len(corr)), corr.columns)
+    for i in range(len(corr)):
+        for j in range(len(corr)):
+            plt.text(j, i, f"{corr.iloc[i, j]:.2f}", ha="center", va="center", fontsize=8)
+    plt.title("Correlation matrix")
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/correlation.png", dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     df = load_data()
     basic_info(df)
@@ -78,3 +106,5 @@ if __name__ == "__main__":
     plot_amount(df)
     plot_hour(df)
     plot_behaviour(df)
+    plot_txn_type(df)
+    plot_correlation(df)
