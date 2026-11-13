@@ -58,9 +58,23 @@ def plot_hour(df):
     plt.close()
 
 
+def plot_behaviour(df):
+    fig, axes = plt.subplots(1, 2, figsize=(9, 4))
+    df.groupby("txn_count_1h")["is_fraud"].mean().mul(100).plot.bar(ax=axes[0], color="indianred")
+    axes[0].set_title("Fraud rate by transactions in last hour")
+    axes[0].set_ylabel("Fraud rate (%)")
+    df.groupby("new_location")["is_fraud"].mean().mul(100).plot.bar(ax=axes[1], color="indianred")
+    axes[1].set_title("Fraud rate by new location")
+    axes[1].set_ylabel("Fraud rate (%)")
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/behaviour_features.png", dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     df = load_data()
     basic_info(df)
     plot_class_distribution(df)
     plot_amount(df)
     plot_hour(df)
+    plot_behaviour(df)
