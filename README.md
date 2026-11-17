@@ -46,7 +46,7 @@ transactions are large, late at night, come in quick bursts and from a new place
 - [x] EDA plots (`src/eda.py`, saved in `reports/figures/`)
 - [x] Feature engineering (`src/features.py`): `amount_ratio`, `is_night`, one-hot `txn_type`
 - [x] Preprocessing (`src/preprocess.py`): stratified split, scaling, oversampling of fraud in train
-- [ ] Model training (Logistic Regression, Decision Tree, Random Forest)
+- [x] Model training (`src/train.py`): Logistic Regression, Decision Tree, Random Forest saved in `models/`
 - [ ] Evaluation and model saving
 - [ ] Prediction script and risk levels
 
@@ -56,6 +56,7 @@ Run order:
 python src/generate_data.py
 python src/eda.py
 python src/preprocess.py
+python src/train.py
 ```
 
 ## Note on the data
