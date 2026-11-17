@@ -1,3 +1,4 @@
+import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -43,3 +44,9 @@ if __name__ == "__main__":
 
     forest = train_forest(X_train, y_train)
     print("random forest trained, train accuracy:", round(forest.score(X_train, y_train), 4))
+
+    # save the models so evaluation and prediction can load them later
+    joblib.dump(log_reg, "models/logistic_regression.joblib")
+    joblib.dump(tree, "models/decision_tree.joblib")
+    joblib.dump(forest, "models/random_forest.joblib")
+    print("saved 3 models in models/")
