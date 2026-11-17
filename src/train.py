@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 
@@ -24,6 +25,11 @@ def train_tree(X, y):
     return model.fit(X, y)
 
 
+def train_forest(X, y):
+    model = RandomForestClassifier(n_estimators=100, max_depth=8, random_state=42, n_jobs=-1)
+    return model.fit(X, y)
+
+
 if __name__ == "__main__":
     X_train, y_train = split_xy(load_train())
     print("features:", X_train.columns.tolist())
@@ -34,3 +40,6 @@ if __name__ == "__main__":
 
     tree = train_tree(X_train, y_train)
     print("decision tree trained, train accuracy:", round(tree.score(X_train, y_train), 4))
+
+    forest = train_forest(X_train, y_train)
+    print("random forest trained, train accuracy:", round(forest.score(X_train, y_train), 4))
