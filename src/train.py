@@ -1,4 +1,10 @@
+import os
+
 import joblib
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import precision_score, recall_score
 from sklearn.ensemble import RandomForestClassifier
@@ -40,6 +46,18 @@ def quick_check(models, path="data/test.csv"):
         print(f"{name}: recall={recall_score(y_test, pred):.3f} precision={precision_score(y_test, pred):.3f}")
 
 
+def plot_feature_importance(model, columns, path="reports/figures/feature_importance.png"):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    order = model.feature_importances_.argsort()
+    plt.figure(figsize=(6, 4))
+    plt.barh([columns[i] for i in order], model.feature_importances_[order], color="steelblue")
+    plt.xlabel("importance")
+    plt.title("Random forest feature importance")
+    plt.tight_layout()
+    plt.savefig(path, dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     X_train, y_train = split_xy(load_train())
     print("features:", X_train.columns.tolist())
@@ -61,3 +79,4 @@ if __name__ == "__main__":
     print("saved 3 models in models/")
 
     quick_check({"logistic regression": log_reg, "decision tree": tree, "random forest": forest})
+    plot_feature_importance(forest, X_train.columns.tolist())
