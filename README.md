@@ -58,12 +58,16 @@ python src/eda.py
 python src/preprocess.py
 ```
 
+## Note on the data
+
+The dataset is synthetic. Fraud rows are generated to look very different from normal rows (big amounts, late night, many transactions in an hour), so models score close to 100% here. These numbers will not match real-world fraud detection.
+
 ## Tech Stack
 
 - Python
 - pandas, NumPy
-- scikit-learn, imbalanced-learn, XGBoost
-- matplotlib, seaborn
+- scikit-learn, joblib
+- matplotlib
 - Jupyter Notebook
 
 ## Planned Project Structure
