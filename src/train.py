@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 
 
 def load_train(path="data/train.csv"):
@@ -17,6 +18,12 @@ def train_logistic(X, y):
     return model.fit(X, y)
 
 
+def train_tree(X, y):
+    # depth is limited so the tree does not just memorise the oversampled fraud rows
+    model = DecisionTreeClassifier(max_depth=5, random_state=42)
+    return model.fit(X, y)
+
+
 if __name__ == "__main__":
     X_train, y_train = split_xy(load_train())
     print("features:", X_train.columns.tolist())
@@ -24,3 +31,6 @@ if __name__ == "__main__":
 
     log_reg = train_logistic(X_train, y_train)
     print("logistic regression trained, train accuracy:", round(log_reg.score(X_train, y_train), 4))
+
+    tree = train_tree(X_train, y_train)
+    print("decision tree trained, train accuracy:", round(tree.score(X_train, y_train), 4))
