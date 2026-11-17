@@ -1,5 +1,6 @@
 import joblib
 import pandas as pd
+from sklearn.metrics import precision_score, recall_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -31,6 +32,14 @@ def train_forest(X, y):
     return model.fit(X, y)
 
 
+def quick_check(models, path="data/test.csv"):
+    # only a sanity check on the untouched test set, full evaluation comes in the next step
+    X_test, y_test = split_xy(pd.read_csv(path))
+    for name, model in models.items():
+        pred = model.predict(X_test)
+        print(f"{name}: recall={recall_score(y_test, pred):.3f} precision={precision_score(y_test, pred):.3f}")
+
+
 if __name__ == "__main__":
     X_train, y_train = split_xy(load_train())
     print("features:", X_train.columns.tolist())
@@ -50,3 +59,5 @@ if __name__ == "__main__":
     joblib.dump(tree, "models/decision_tree.joblib")
     joblib.dump(forest, "models/random_forest.joblib")
     print("saved 3 models in models/")
+
+    quick_check({"logistic regression": log_reg, "decision tree": tree, "random forest": forest})
