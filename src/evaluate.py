@@ -40,12 +40,19 @@ def compute_metrics(y_true, pred, proba):
     }
 
 
+def build_table(models, X, y):
+    rows = {}
+    for name, model in models.items():
+        pred, proba = get_predictions(model, X)
+        rows[name] = compute_metrics(y, pred, proba)
+    return pd.DataFrame(rows).T.round(3)
+
+
 if __name__ == "__main__":
     X_test, y_test = load_test()
     models = load_models()
     print("test shape:", X_test.shape, "fraud rows:", int(y_test.sum()))
     print("models loaded:", list(models))
 
-    for name, model in models.items():
-        pred, proba = get_predictions(model, X_test)
-        print(name, {k: round(v, 3) for k, v in compute_metrics(y_test, pred, proba).items()})
+    table = build_table(models, X_test, y_test)
+    print(table)
