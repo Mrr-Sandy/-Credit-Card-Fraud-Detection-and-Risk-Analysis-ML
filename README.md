@@ -2,7 +2,7 @@
 
 A machine learning project that detects fraudulent credit card transactions and scores the risk of each transaction, so suspicious activity can be flagged for review.
 
-> **Status:** Work in progress. This README describes the project goals and planned structure. Results will be added once the models are trained and evaluated.
+> **Status:** Work in progress. Data, EDA, preprocessing, training and evaluation are done. The prediction script with risk levels is still to be added.
 
 ## Overview
 
@@ -47,7 +47,7 @@ transactions are large, late at night, come in quick bursts and from a new place
 - [x] Feature engineering (`src/features.py`): `amount_ratio`, `is_night`, one-hot `txn_type`
 - [x] Preprocessing (`src/preprocess.py`): stratified split, scaling, oversampling of fraud in train
 - [x] Model training (`src/train.py`): Logistic Regression, Decision Tree, Random Forest saved in `models/`
-- [ ] Evaluation and model saving
+- [x] Evaluation (`src/evaluate.py`): metrics table, confusion matrices, ROC and PR curves
 - [ ] Prediction script and risk levels
 
 Run order:
@@ -57,6 +57,7 @@ python src/generate_data.py
 python src/eda.py
 python src/preprocess.py
 python src/train.py
+python src/evaluate.py
 ```
 
 ## Note on the data
