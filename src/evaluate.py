@@ -1,0 +1,24 @@
+import joblib
+import pandas as pd
+
+MODEL_FILES = {
+    "Logistic Regression": "models/logistic_regression.joblib",
+    "Decision Tree": "models/decision_tree.joblib",
+    "Random Forest": "models/random_forest.joblib",
+}
+
+
+def load_test(path="data/test.csv"):
+    df = pd.read_csv(path)
+    return df.drop(columns="is_fraud"), df["is_fraud"]
+
+
+def load_models():
+    return {name: joblib.load(path) for name, path in MODEL_FILES.items()}
+
+
+if __name__ == "__main__":
+    X_test, y_test = load_test()
+    models = load_models()
+    print("test shape:", X_test.shape, "fraud rows:", int(y_test.sum()))
+    print("models loaded:", list(models))
