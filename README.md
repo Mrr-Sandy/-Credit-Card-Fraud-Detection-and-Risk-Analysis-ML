@@ -96,7 +96,15 @@ jupyter notebook
 
 ## Results
 
-To be added: model comparison table, confusion matrix and ROC / PR curves.
+Evaluated on `data/test.csv` (1000 transactions, 50 fraud, not oversampled):
+
+| Model | Precision | Recall | F1 | ROC-AUC | PR-AUC |
+|---|---|---|---|---|---|
+| Logistic Regression | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Decision Tree | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Random Forest | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+
+All three models separate fraud perfectly because the synthetic data is easy (see the note on the data above). The models cannot be ranked from this test set. Plots are in `reports/figures/`: `confusion_matrices.png`, `roc_curves.png`, `pr_curves.png`. The table is also saved in `reports/model_comparison.csv`.
 
 ## Author
 
