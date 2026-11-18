@@ -94,6 +94,22 @@ def plot_roc_curves(models, X, y):
     plt.close()
 
 
+def plot_pr_curves(models, X, y):
+    plt.figure(figsize=(5, 4.5))
+    for name, model in models.items():
+        proba = model.predict_proba(X)[:, 1]
+        precision, recall, _ = precision_recall_curve(y, proba)
+        plt.plot(recall, precision, label=f"{name} (AP={average_precision_score(y, proba):.3f})")
+    plt.axhline(y.mean(), color="k", linestyle="--", linewidth=1, label="Random guess")
+    plt.xlabel("Recall")
+    plt.ylabel("Precision")
+    plt.title("Precision-Recall curves")
+    plt.legend(loc="lower left", fontsize=8)
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/pr_curves.png", dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     X_test, y_test = load_test()
     models = load_models()
@@ -109,3 +125,4 @@ if __name__ == "__main__":
 
     plot_confusion_matrices(models, X_test, y_test)
     plot_roc_curves(models, X_test, y_test)
+    plot_pr_curves(models, X_test, y_test)
