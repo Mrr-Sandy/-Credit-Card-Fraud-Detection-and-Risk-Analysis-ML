@@ -9,6 +9,8 @@ import pandas as pd
 from sklearn.metrics import (
     confusion_matrix,
     average_precision_score,
+    precision_recall_curve,
+    roc_curve,
     f1_score,
     precision_score,
     recall_score,
@@ -76,6 +78,22 @@ def plot_confusion_matrices(models, X, y):
     plt.close()
 
 
+def plot_roc_curves(models, X, y):
+    plt.figure(figsize=(5, 4.5))
+    for name, model in models.items():
+        proba = model.predict_proba(X)[:, 1]
+        fpr, tpr, _ = roc_curve(y, proba)
+        plt.plot(fpr, tpr, label=f"{name} (AUC={roc_auc_score(y, proba):.3f})")
+    plt.plot([0, 1], [0, 1], "k--", linewidth=1, label="Random guess")
+    plt.xlabel("False positive rate")
+    plt.ylabel("True positive rate")
+    plt.title("ROC curves")
+    plt.legend(loc="lower right", fontsize=8)
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/roc_curves.png", dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     X_test, y_test = load_test()
     models = load_models()
@@ -90,3 +108,4 @@ if __name__ == "__main__":
     print("saved reports/model_comparison.csv")
 
     plot_confusion_matrices(models, X_test, y_test)
+    plot_roc_curves(models, X_test, y_test)
