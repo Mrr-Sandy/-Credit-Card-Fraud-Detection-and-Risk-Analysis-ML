@@ -1,3 +1,5 @@
+import os
+
 import joblib
 import pandas as pd
 from sklearn.metrics import (
@@ -56,3 +58,7 @@ if __name__ == "__main__":
 
     table = build_table(models, X_test, y_test)
     print(table)
+
+    os.makedirs("reports", exist_ok=True)
+    table.to_csv("reports/model_comparison.csv")
+    print("saved reports/model_comparison.csv")
