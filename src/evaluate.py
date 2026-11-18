@@ -1,8 +1,13 @@
 import os
 
 import joblib
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import (
+    confusion_matrix,
     average_precision_score,
     f1_score,
     precision_score,
@@ -50,6 +55,27 @@ def build_table(models, X, y):
     return pd.DataFrame(rows).T.round(3)
 
 
+FIG_DIR = "reports/figures"
+
+
+def plot_confusion_matrices(models, X, y):
+    fig, axes = plt.subplots(1, len(models), figsize=(4 * len(models), 3.6))
+    for ax, (name, model) in zip(axes, models.items()):
+        cm = confusion_matrix(y, model.predict(X))
+        ax.imshow(cm, cmap="Blues")
+        for i in range(2):
+            for j in range(2):
+                ax.text(j, i, cm[i, j], ha="center", va="center", fontsize=12)
+        ax.set_xticks([0, 1], ["Normal", "Fraud"])
+        ax.set_yticks([0, 1], ["Normal", "Fraud"])
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Actual")
+        ax.set_title(name)
+    plt.tight_layout()
+    plt.savefig(f"{FIG_DIR}/confusion_matrices.png", dpi=120)
+    plt.close()
+
+
 if __name__ == "__main__":
     X_test, y_test = load_test()
     models = load_models()
@@ -62,3 +88,5 @@ if __name__ == "__main__":
     os.makedirs("reports", exist_ok=True)
     table.to_csv("reports/model_comparison.csv")
     print("saved reports/model_comparison.csv")
+
+    plot_confusion_matrices(models, X_test, y_test)
