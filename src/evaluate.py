@@ -1,5 +1,12 @@
 import joblib
 import pandas as pd
+from sklearn.metrics import (
+    average_precision_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 
 MODEL_FILES = {
     "Logistic Regression": "models/logistic_regression.joblib",
@@ -22,6 +29,17 @@ def get_predictions(model, X):
     return model.predict(X), model.predict_proba(X)[:, 1]
 
 
+def compute_metrics(y_true, pred, proba):
+    # accuracy is left out on purpose, it is misleading when fraud is rare
+    return {
+        "Precision": precision_score(y_true, pred),
+        "Recall": recall_score(y_true, pred),
+        "F1": f1_score(y_true, pred),
+        "ROC-AUC": roc_auc_score(y_true, proba),
+        "PR-AUC": average_precision_score(y_true, proba),
+    }
+
+
 if __name__ == "__main__":
     X_test, y_test = load_test()
     models = load_models()
@@ -30,4 +48,4 @@ if __name__ == "__main__":
 
     for name, model in models.items():
         pred, proba = get_predictions(model, X_test)
-        print(name, "- predicted fraud:", int(pred.sum()), "- max proba:", round(proba.max(), 3))
+        print(name, {k: round(v, 3) for k, v in compute_metrics(y_test, pred, proba).items()})
