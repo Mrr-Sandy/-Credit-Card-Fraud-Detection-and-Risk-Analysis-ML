@@ -55,7 +55,17 @@ def predict_transaction(transaction, model=None, scaler=None):
     return {"fraud_probability": round(prob, 3), "risk_level": risk_level(prob)}
 
 
+EXAMPLES = {
+    "usual daytime purchase": {"amount": 450, "hour": 14, "txn_count_1h": 1, "avg_spending": 700,
+                               "new_location": 0, "txn_type": "pos"},
+    "big amount, but daytime and usual place": {"amount": 9000, "hour": 15, "txn_count_1h": 1,
+                                                "avg_spending": 800, "new_location": 0, "txn_type": "online"},
+    "big amount, night, new place, many txns": {"amount": 35000, "hour": 2, "txn_count_1h": 6,
+                                                "avg_spending": 600, "new_location": 1, "txn_type": "online"},
+}
+
+
 if __name__ == "__main__":
-    example = {"amount": 450, "hour": 14, "txn_count_1h": 1, "avg_spending": 700,
-               "new_location": 0, "txn_type": "pos"}
-    print(predict_transaction(example))
+    model, scaler = load_model(), load_scaler()
+    for name, txn in EXAMPLES.items():
+        print(f"{name}: {predict_transaction(txn, model, scaler)}")
