@@ -47,13 +47,15 @@ def risk_level(probability):
     return "High"
 
 
-if __name__ == "__main__":
-    model = load_model()
-    scaler = load_scaler()
-    print("model features:", list(model.feature_names_in_))
-    print("scaled columns:", list(scaler.index))
+def predict_transaction(transaction, model=None, scaler=None):
+    # main function: raw transaction in, probability and risk level out
+    model = model or load_model()
+    scaler = scaler if scaler is not None else load_scaler()
+    prob = fraud_probability(transaction, model, scaler)
+    return {"fraud_probability": round(prob, 3), "risk_level": risk_level(prob)}
 
+
+if __name__ == "__main__":
     example = {"amount": 450, "hour": 14, "txn_count_1h": 1, "avg_spending": 700,
                "new_location": 0, "txn_type": "pos"}
-    prob = fraud_probability(example, model, scaler)
-    print("fraud probability:", round(prob, 3), "->", risk_level(prob), "risk")
+    print(predict_transaction(example))
