@@ -118,6 +118,15 @@ predict_transaction({"amount": 35000, "hour": 2, "txn_count_1h": 6,
 
 The Random Forest model is used. `src/risk_report.py` counts the test transactions per risk level (`reports/risk_summary.csv`, `reports/figures/risk_levels.png`).
 
+## Web dashboard
+
+`dashboard/` is a web dashboard (deployed on Vercel) with a live risk checker, charts and model results.
+
+- `dashboard/public/index.html` is the page, `dashboard/public/data.json` holds the numbers it shows.
+- `dashboard/api/predict.js` runs the Random Forest in JavaScript (trees exported to `dashboard/api/_model.json`).
+- Environment variables (all optional): `LOW_LIMIT` (default 0.30), `HIGH_LIMIT` (0.70), `MAX_AMOUNT` (1000000), `MODEL_NAME`, `APP_ENV`.
+- After retraining, run `python src/export_dashboard.py` to refresh the exported model and numbers.
+
 ## Results
 
 Evaluated on `data/test.csv` (1000 transactions, 50 fraud, not oversampled):
