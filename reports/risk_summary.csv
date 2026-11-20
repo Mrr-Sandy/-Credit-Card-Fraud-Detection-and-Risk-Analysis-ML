@@ -1,0 +1,4 @@
+risk_level,transactions,fraud
+Low,950,0
+Medium,0,0
+High,50,50
