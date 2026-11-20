@@ -3,6 +3,9 @@ import pandas as pd
 
 from features import build_features
 
+# probability below LOW_LIMIT is Low, from HIGH_LIMIT upwards is High, the rest is Medium
+LOW_LIMIT = 0.30
+HIGH_LIMIT = 0.70
 MODEL_PATH = "models/random_forest.joblib"
 SCALER_PATH = "models/scaler_values.csv"
 
@@ -36,6 +39,14 @@ def fraud_probability(transaction, model, scaler):
     return float(model.predict_proba(X)[0, 1])
 
 
+def risk_level(probability):
+    if probability < LOW_LIMIT:
+        return "Low"
+    if probability < HIGH_LIMIT:
+        return "Medium"
+    return "High"
+
+
 if __name__ == "__main__":
     model = load_model()
     scaler = load_scaler()
@@ -44,4 +55,5 @@ if __name__ == "__main__":
 
     example = {"amount": 450, "hour": 14, "txn_count_1h": 1, "avg_spending": 700,
                "new_location": 0, "txn_type": "pos"}
-    print("fraud probability:", round(fraud_probability(example, model, scaler), 3))
+    prob = fraud_probability(example, model, scaler)
+    print("fraud probability:", round(prob, 3), "->", risk_level(prob), "risk")
