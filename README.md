@@ -95,6 +95,27 @@ jupyter notebook
 
 (`requirements.txt` and notebooks will be added as the project develops.)
 
+## Predicting risk
+
+`src/predict.py` takes one raw transaction and returns the fraud probability and a risk level.
+
+```python
+# run from the project root: python src/predict.py
+from predict import predict_transaction
+
+predict_transaction({"amount": 35000, "hour": 2, "txn_count_1h": 6,
+                     "avg_spending": 600, "new_location": 1, "txn_type": "online"})
+# {'fraud_probability': 1.0, 'risk_level': 'High'}
+```
+
+| Fraud probability | Risk level |
+|---|---|
+| below 0.30 | Low |
+| 0.30 to 0.70 | Medium |
+| 0.70 and above | High |
+
+The Random Forest model is used. `src/risk_report.py` counts the test transactions per risk level (`reports/risk_summary.csv`, `reports/figures/risk_levels.png`).
+
 ## Results
 
 Evaluated on `data/test.csv` (1000 transactions, 50 fraud, not oversampled):
