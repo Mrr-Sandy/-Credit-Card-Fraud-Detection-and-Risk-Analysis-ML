@@ -31,6 +31,11 @@ def scale_input(df, scaler):
     return df
 
 
+def fraud_probability(transaction, model, scaler):
+    X = scale_input(prepare_input(transaction, model), scaler)
+    return float(model.predict_proba(X)[0, 1])
+
+
 if __name__ == "__main__":
     model = load_model()
     scaler = load_scaler()
@@ -39,4 +44,4 @@ if __name__ == "__main__":
 
     example = {"amount": 450, "hour": 14, "txn_count_1h": 1, "avg_spending": 700,
                "new_location": 0, "txn_type": "pos"}
-    print(scale_input(prepare_input(example, model), scaler).round(2).to_string())
+    print("fraud probability:", round(fraud_probability(example, model, scaler), 3))
