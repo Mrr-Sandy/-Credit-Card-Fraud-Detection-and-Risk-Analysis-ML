@@ -73,6 +73,8 @@ def build_stats(model):
         "hour": {"normal": normal.hour.value_counts().reindex(range(24), fill_value=0).tolist(),
                  "fraud": fraud.hour.value_counts().reindex(range(24), fill_value=0).tolist()},
         "amount": {"edges": [round(float(e), 1) for e in edges],
+                   "normal_max": round(float(normal.amount.max()), 2),
+                   "fraud_min": round(float(fraud.amount.min()), 2),
                    "normal": hist_log(normal.amount, edges), "fraud": hist_log(fraud.amount, edges)},
         "txn_count": {"normal": normal.txn_count_1h.value_counts().reindex(range(1, 9), fill_value=0).tolist(),
                       "fraud": fraud.txn_count_1h.value_counts().reindex(range(1, 9), fill_value=0).tolist()},
