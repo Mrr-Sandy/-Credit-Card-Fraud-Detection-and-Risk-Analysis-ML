@@ -23,6 +23,14 @@ def prepare_input(transaction, model):
     return df.reindex(columns=model.feature_names_in_, fill_value=0)
 
 
+def scale_input(df, scaler):
+    # use the train mean/std, never recompute them on new data
+    df = df.copy()
+    cols = list(scaler.index)
+    df[cols] = (df[cols] - scaler["mean"]) / scaler["std"]
+    return df
+
+
 if __name__ == "__main__":
     model = load_model()
     scaler = load_scaler()
@@ -31,4 +39,4 @@ if __name__ == "__main__":
 
     example = {"amount": 450, "hour": 14, "txn_count_1h": 1, "avg_spending": 700,
                "new_location": 0, "txn_type": "pos"}
-    print(prepare_input(example, model).round(2).to_string())
+    print(scale_input(prepare_input(example, model), scaler).round(2).to_string())
