@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fraud Radar</title>
+<meta name="description" content="Credit card fraud detection and risk analysis dashboard with a live risk checker.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='white' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='3' fill='white'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f5f6fa; --surface:#ffffff; --surface-2:#f1f3f9; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --accent:#4f46e5; --accent-ink:#ffffff;
+  --normal:#3b82f6; --fraud:#ef4444;
+  --low:#16a34a; --med:#d97706; --high:#dc2626;
+  --low-bg:#dcfce7; --med-bg:#fef3c7; --high-bg:#fee2e2;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.05);
+  --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1020; --surface:#131a2e; --surface-2:#1a2340; --ink:#e8ecf6; --muted:#98a2b8; --line:#243050;
+    --accent:#818cf8; --accent-ink:#0b1020;
+    --normal:#60a5fa; --fraud:#f87171;
+    --low:#4ade80; --med:#fbbf24; --high:#f87171;
+    --low-bg:#10321f; --med-bg:#3a2a0a; --high-bg:#3d1518;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1020; --surface:#131a2e; --surface-2:#1a2340; --ink:#e8ecf6; --muted:#98a2b8; --line:#243050;
+  --accent:#818cf8; --accent-ink:#0b1020;
+  --normal:#60a5fa; --fraud:#f87171;
+  --low:#4ade80; --med:#fbbf24; --high:#f87171;
+  --low-bg:#10321f; --med-bg:#3a2a0a; --high-bg:#3d1518;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 56px}
+h1,h2,h3{margin:0;line-height:1.2}
+button{font:inherit;color:inherit}
+
+/* header */
+header{display:flex;align-items:center;gap:12px;padding:20px 0 8px;flex-wrap:wrap}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--accent);display:grid;place-items:center;flex:none}
+.logo svg{width:24px;height:24px}
+.title h1{font-size:20px;letter-spacing:-.01em}
+.title p{margin:0;color:var(--muted);font-size:13px}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--low)}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer}
+.icon-btn:hover{background:var(--surface-2)}
+.icon-btn:focus-visible,.seg button:focus-visible,.chip:focus-visible,.step button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.notice{margin:12px 0 18px;padding:10px 14px;border-radius:12px;background:var(--med-bg);color:var(--ink);border:1px solid color-mix(in srgb,var(--med) 35%,transparent);font-size:13.5px;display:flex;gap:10px;align-items:flex-start}
+.notice b{font-weight:650}
+
+/* cards */
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.card h2{font-size:15px;font-weight:650;letter-spacing:-.005em}
+.card .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.kpi .label{color:var(--muted);font-size:12.5px}
+.kpi .value{font-size:30px;font-weight:700;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi .note{color:var(--muted);font-size:12.5px;margin-top:2px}
+
+/* checker */
+.checker{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);margin-top:16px}
+.field{margin-top:16px}
+.field label,.field .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
+.field .lbl output{color:var(--ink);font-weight:600}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.two>div{min-width:0}
+.inp{display:flex;align-items:center;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:0 12px;height:42px}
+.inp:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.inp span{color:var(--muted);margin-right:6px}
+.inp input{flex:1;width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:600;outline:none;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);height:24px;margin:0}
+.ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px}
+.seg{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:8px;height:36px;cursor:pointer;color:var(--muted);font-weight:550}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.step{display:flex;align-items:center;gap:10px}
+.step button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;font-size:18px}
+.step output{min-width:28px;text-align:center;font-weight:650;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+
+/* result */
+.result{display:flex;flex-direction:column;align-items:center;text-align:center}
+.gauge{width:100%;max-width:340px;margin-top:8px}
+.needle{transform-origin:110px 110px;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;font-weight:700;font-size:18px;margin-top:-6px;transition:background .3s,color .3s}
+.badge.Low{background:var(--low-bg);color:var(--low)}
+.badge.Medium{background:var(--med-bg);color:var(--med)}
+.badge.High{background:var(--high-bg);color:var(--high)}
+.prob{font-size:13.5px;color:var(--muted);margin-top:8px}
+.prob b{color:var(--ink);font-size:15px}
+.signals{list-style:none;margin:16px 0 0;padding:0;width:100%;text-align:left;display:grid;gap:8px}
+.signals li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;padding:8px 12px;border-radius:10px;background:var(--surface-2)}
+.signals .ic{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;margin-top:1px}
+.ic.ok{background:var(--low)}.ic.warn{background:var(--med)}.ic.bad{background:var(--high)}
+.err{color:var(--high);font-size:13px;margin-top:12px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* charts */
+.charts{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:16px}
+.chart svg{width:100%;height:auto;display:block;margin-top:10px;overflow:visible}
+.chart text{fill:var(--muted);font-size:10.5px;font-family:inherit}
+.chart .grid-line{stroke:var(--line);stroke-width:1}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:550;font-size:12px}
+tr:last-child td{border-bottom:0}
+.cm{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;margin-top:14px;align-items:stretch}
+.cm div{border-radius:10px;padding:10px;text-align:center}
+.cm .h{color:var(--muted);font-size:12px;padding:4px}
+.cm .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.cm .v small{display:block;font-size:11.5px;font-weight:500;color:var(--muted)}
+.cm .good{background:var(--low-bg)}.cm .badc{background:var(--high-bg)}
+footer{margin-top:28px;color:var(--muted);font-size:12.5px;display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between}
+footer a{color:var(--accent)}
+
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .checker,.charts{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:480px){
+  .kpi .value{font-size:26px}
+  .card{padding:16px}
+  .two{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion: reduce){ .needle,.badge{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5" fill="#fff"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/></svg></div>
+    <div class="title"><h1>Fraud Radar</h1><p>Credit card fraud detection &amp; risk analysis</p></div>
+    <div class="spacer"></div>
+    <span class="pill"><span class="dot"></span><span id="modelPill">Random Forest</span></span>
+    <span class="pill" id="envPill" hidden></span>
+    <button class="icon-btn" id="themeBtn" aria-label="Toggle light or dark theme" title="Toggle theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+    </button>
+  </header>
+
+  <div class="notice" role="note"><span aria-hidden="true">⚠️</span><span><b>Synthetic data.</b> The transactions are generated, and fraud is made to look very different from normal activity. The near-perfect scores below show an easy dataset, not real-world performance.</span></div>
+
+  <section class="grid kpis" aria-label="Key numbers" id="kpis"></section>
+
+  <section class="grid checker" aria-label="Risk checker">
+    <div class="card">
+      <h2>Check a transaction</h2>
+      <div class="sub">Change the details and the risk score updates instantly.</div>
+      <div class="chips" aria-label="Examples">
+        <button class="chip" data-preset="usual">Usual purchase</button>
+        <button class="chip" data-preset="large">Large daytime purchase</button>
+        <button class="chip" data-preset="burst">Suspicious night burst</button>
+      </div>
+
+      <div class="field two">
+        <div><label for="amount">Amount</label><div class="inp"><span>₹</span><input id="amount" type="number" min="1" step="1" inputmode="numeric"></div></div>
+        <div><label for="avg">Card's usual spending</label><div class="inp"><span>₹</span><input id="avg" type="number" min="1" step="1" inputmode="numeric"></div></div>
+      </div>
+
+      <div class="field">
+        <div class="lbl"><label for="hour" style="margin:0">Time of day</label><output id="hourOut"></output></div>
+        <input id="hour" type="range" min="0" max="23" step="1">
+        <div class="ticks"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>11 PM</span></div>
+      </div>
+
+      <div class="field two">
+        <div><div class="lbl">Transactions in last hour</div>
+          <div class="step"><button type="button" id="cMinus" aria-label="Fewer">−</button><output id="cOut">1</output><button type="button" id="cPlus" aria-label="More">+</button></div></div>
+        <div><div class="lbl">New location?</div>
+          <div class="seg" id="locSeg" role="group" aria-label="New location"><button type="button" data-v="0" aria-pressed="true">No</button><button type="button" data-v="1" aria-pressed="false">Yes</button></div></div>
+      </div>
+
+      <div class="field"><div class="lbl">Transaction type</div>
+        <div class="seg" id="typeSeg" role="group" aria-label="Transaction type">
+          <button type="button" data-v="online" aria-pressed="true">Online</button>
+          <button type="button" data-v="pos" aria-pressed="false">POS</button>
+          <button type="button" data-v="atm" aria-pressed="false">ATM</button>
+        </div></div>
+      <div class="err" id="err" role="alert"></div>
+    </div>
+
+    <div class="card result" aria-live="polite">
+      <h2 style="align-self:flex-start">Risk result</h2>
+      <svg class="gauge" viewBox="0 0 220 128" role="img" aria-label="Risk gauge" id="gauge">
+        <g id="arcs"></g>
+        <g class="needle" id="needle" style="transform:rotate(0deg)"><line x1="110" y1="110" x2="46" y2="110" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><circle cx="110" cy="110" r="7" fill="var(--ink)"/></g>
+        <text x="14" y="126" font-size="10" fill="var(--muted)">0%</text>
+        <text x="206" y="126" font-size="10" fill="var(--muted)" text-anchor="end">100%</text>
+      </svg>
+      <div class="badge Low" id="badge">Low risk</div>
+      <div class="prob">Fraud probability <b id="probOut">–</b></div>
+      <ul class="signals" id="signals"></ul>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="grid charts" aria-label="Insights">
+    <div class="card chart"><h2>When does fraud happen?</h2><div class="sub">Share of each group's transactions by hour of day</div><svg id="chHour" viewBox="0 0 480 230"></svg><div class="legend"><span><i style="background:var(--normal)"></i>Normal</span><span><i style="background:var(--fraud)"></i>Fraud</span></div></div>
+    <div class="card chart"><h2>How big are the amounts?</h2><div class="sub">Number of transactions by amount (amount axis is log scale)</div><svg id="chAmount" viewBox="0 0 480 230"></svg><div class="legend"><span><i style="background:var(--normal)"></i>Normal</span><span><i style="background:var(--fraud)"></i>Fraud</span></div></div>
+    <div class="card chart"><h2>What the model looks at</h2><div class="sub">Random Forest feature importance</div><svg id="chImp" viewBox="0 0 480 270"></svg></div>
+    <div class="card chart"><h2>Test set by risk level</h2><div class="sub">1,000 unseen transactions, grouped by predicted risk</div><svg id="chRisk" viewBox="0 0 480 230"></svg><div class="legend"><span><i style="background:var(--normal)"></i>Normal</span><span><i style="background:var(--fraud)"></i>Fraud</span></div></div>
+    <div class="card chart"><h2>Model comparison</h2><div class="sub">Scores on the test set</div><div style="overflow-x:auto"><table id="metrics"></table></div></div>
+    <div class="card chart"><h2>Confusion matrix</h2><div class="sub" id="cmSub">Random Forest on the test set</div><div class="cm" id="cm"></div></div>
+  </section>
+
+  <footer>
+    <span>Built from <a href="https://github.com/Mrr-Sandy/-Credit-Card-Fraud-Detection-and-Risk-Analysis-ML" target="_blank" rel="noopener">the project repository</a> · Python model, served with JavaScript</span>
+    <span id="thresholdNote"></span>
+  </footer>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+const fmt = new Intl.NumberFormat("en-IN");
+let CFG = { low: 0.3, high: 0.7, maxAmount: 1000000, model: "Random Forest", env: "" };
+let DATA = null;
+
+/* ---------- theme ---------- */
+$("#themeBtn").addEventListener("click", () => {
+  const cur = document.documentElement.dataset.theme ||
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
+});
+
+/* ---------- svg helpers ---------- */
+function el(name, attrs = {}, parent, text) {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+function compact(n) { return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(".0", "") + "k" : String(Math.round(n)); }
+
+/* grouped vertical bars: groups = [{label, values:[a,b]}] */
+function groupedBars(svg, groups, colors, opts = {}) {
+  clear(svg);
+  const W = 480, H = 230, L = 36, R = 8, T = 10, B = 28;
+  const max = opts.max || Math.max(...groups.flatMap((g) => g.values)) * 1.1 || 1;
+  const iw = W - L - R, ih = H - T - B;
+  for (let i = 0; i <= 4; i++) {
+    const y = T + ih - (ih * i) / 4;
+    el("line", { x1: L, x2: W - R, y1: y, y2: y, class: "grid-line" }, svg);
+    el("text", { x: L - 6, y: y + 3, "text-anchor": "end" }, svg, opts.yfmt ? opts.yfmt((max * i) / 4) : compact((max * i) / 4));
+  }
+  const gw = iw / groups.length, n = colors.length, bw = Math.max(1.5, (gw * 0.8) / n);
+  groups.forEach((g, gi) => {
+    g.values.forEach((v, si) => {
+      const h = (v / max) * ih;
+      const r = el("rect", { x: L + gi * gw + gw * 0.1 + si * bw, y: T + ih - h, width: bw - 0.5, height: Math.max(h, 0), rx: 1.5, fill: colors[si] }, svg);
+      el("title", {}, r, `${g.label}: ${opts.names ? opts.names[si] + " " : ""}${opts.tfmt ? opts.tfmt(v) : v}`);
+    });
+    if (!opts.labelEvery || gi % opts.labelEvery === 0)
+      el("text", { x: L + gi * gw + gw / 2, y: H - 10, "text-anchor": "middle" }, svg, g.label);
+  });
+}
+
+/* horizontal bars */
+function hbars(svg, rows, color) {
+  clear(svg);
+  const W = 480, L = 110, R = 44, rowH = 26, T = 4;
+  const max = Math.max(...rows.map((r) => r.value));
+  rows.forEach((r, i) => {
+    const y = T + i * rowH;
+    el("text", { x: L - 8, y: y + 15, "text-anchor": "end", style: "fill:var(--ink);font-size:11.5px" }, svg, r.label);
+    const w = (r.value / max) * (W - L - R);
+    const b = el("rect", { x: L, y: y + 3, width: w, height: 16, rx: 4, fill: color }, svg);
+    el("title", {}, b, `${r.label}: ${(r.value * 100).toFixed(1)}%`);
+    el("text", { x: L + w + 6, y: y + 15 }, svg, (r.value * 100).toFixed(1) + "%");
+  });
+  svg.setAttribute("viewBox", `0 0 ${W} ${T + rows.length * rowH + 4}`);
+}
+
+/* stacked bars for risk levels */
+function stacked(svg, risk) {
+  clear(svg);
+  const W = 480, H = 230, L = 40, R = 8, T = 10, B = 28;
+  const levels = ["Low", "Medium", "High"];
+  const totals = levels.map((l) => risk[l].normal + risk[l].fraud);
+  const max = Math.max(...totals, 1) * 1.1, iw = W - L - R, ih = H - T - B;
+  for (let i = 0; i <= 4; i++) {
+    const y = T + ih - (ih * i) / 4;
+    el("line", { x1: L, x2: W - R, y1: y, y2: y, class: "grid-line" }, svg);
+    el("text", { x: L - 6, y: y + 3, "text-anchor": "end" }, svg, compact((max * i) / 4));
+  }
+  const gw = iw / 3, bw = gw * 0.5;
+  levels.forEach((l, i) => {
+    const x = L + i * gw + (gw - bw) / 2;
+    const hn = (risk[l].normal / max) * ih, hf = (risk[l].fraud / max) * ih;
+    const a = el("rect", { x, y: T + ih - hn, width: bw, height: hn, rx: 4, fill: "var(--normal)" }, svg);
+    el("title", {}, a, `${l}: ${risk[l].normal} normal`);
+    const b = el("rect", { x, y: T + ih - hn - hf, width: bw, height: hf, rx: 4, fill: "var(--fraud)" }, svg);
+    el("title", {}, b, `${l}: ${risk[l].fraud} fraud`);
+    el("text", { x: x + bw / 2, y: H - 10, "text-anchor": "middle", style: "fill:var(--ink);font-size:12px" }, svg, l);
+    el("text", { x: x + bw / 2, y: T + ih - hn - hf - 6, "text-anchor": "middle", style: "fill:var(--ink);font-size:12px;font-weight:600" }, svg, totals[i]);
+  });
+}
+
+/* ---------- dashboard sections ---------- */
+function renderKpis(d) {
+  const m = d.metrics[CFG.model] || Object.values(d.metrics)[0];
+  const k = [
+    ["Transactions analysed", fmt.format(d.dataset.rows), `${fmt.format(d.dataset.normal)} normal`],
+    ["Fraud rate", (d.dataset.fraud_rate * 100).toFixed(1) + "%", `${fmt.format(d.dataset.fraud)} fraudulent`],
+    ["Recall (test)", (m.Recall * 100).toFixed(1) + "%", "Share of fraud that was caught"],
+    ["Precision (test)", (m.Precision * 100).toFixed(1) + "%", "Share of alerts that were real fraud"],
+  ];
+  $("#kpis").innerHTML = k.map(([l, v, n]) => `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div><div class="note">${n}</div></div>`).join("");
+}
+
+function renderCharts(d) {
+  const hs = (arr) => { const t = arr.reduce((a, b) => a + b, 0) || 1; return arr.map((v) => (v / t) * 100); };
+  const hn = hs(d.hour.normal), hf = hs(d.hour.fraud);
+  groupedBars($("#chHour"), hn.map((v, i) => ({ label: String(i), values: [v, hf[i]] })), ["var(--normal)", "var(--fraud)"],
+    { yfmt: (v) => Math.round(v) + "%", tfmt: (v) => v.toFixed(1) + "% of group", names: ["Normal", "Fraud"], labelEvery: 3 });
+
+  const e = d.amount.edges;
+  const lbl = (i) => "₹" + compact(e[i]);
+  groupedBars($("#chAmount"), d.amount.normal.map((v, i) => ({ label: lbl(i), values: [v, d.amount.fraud[i]] })), ["var(--normal)", "var(--fraud)"],
+    { names: ["Normal", "Fraud"], labelEvery: 4, tfmt: (v) => v + " transactions" });
+
+  const nice = { amount: "Amount", is_night: "Late night", txn_count_1h: "Txns in 1 hour", amount_ratio: "Amount vs usual", avg_spending: "Usual spending", hour: "Hour", new_location: "New location", type_online: "Type: online", type_pos: "Type: POS", type_atm: "Type: ATM" };
+  hbars($("#chImp"), d.importance.map((x) => ({ label: nice[x.feature] || x.feature, value: x.value })), "var(--accent)");
+
+  stacked($("#chRisk"), d.risk);
+
+  const cols = ["Precision", "Recall", "F1", "ROC-AUC", "PR-AUC"];
+  $("#metrics").innerHTML = `<tr><th>Model</th>${cols.map((c) => `<th>${c}</th>`).join("")}</tr>` +
+    Object.entries(d.metrics).map(([n, r]) => `<tr><td>${n}${n === CFG.model ? ' <span class="pill" style="padding:1px 8px;font-size:11px">live</span>' : ""}</td>${cols.map((c) => `<td>${r[c].toFixed(3)}</td>`).join("")}</tr>`).join("");
+
+  const c = d.confusion;
+  $("#cmSub").textContent = `${CFG.model} on ${fmt.format(d.dataset.test_rows)} test transactions`;
+  $("#cm").innerHTML = `<div class="h"></div><div class="h">Predicted normal</div><div class="h">Predicted fraud</div>
+    <div class="h" style="writing-mode:vertical-rl;transform:rotate(180deg)">Actual normal</div><div class="good v">${fmt.format(c.tn)}<small>correct</small></div><div class="${c.fp ? "badc" : "good"} v">${c.fp}<small>false alarms</small></div>
+    <div class="h" style="writing-mode:vertical-rl;transform:rotate(180deg)">Actual fraud</div><div class="${c.fn ? "badc" : "good"} v">${c.fn}<small>missed</small></div><div class="good v">${c.tp}<small>caught</small></div>`;
+}
+
+/* ---------- gauge ---------- */
+function pt(frac, r) { const a = Math.PI * (1 - frac); return [110 + r * Math.cos(a), 110 - r * Math.sin(a)]; }
+function arc(a, b, color) {
+  const [x1, y1] = pt(a, 90), [x2, y2] = pt(b, 90);
+  return el("path", { d: `M${x1} ${y1} A90 90 0 0 1 ${x2} ${y2}`, fill: "none", stroke: color, "stroke-width": 16, "stroke-linecap": "butt" });
+}
+function drawGauge() {
+  const g = $("#arcs"); clear(g);
+  g.appendChild(arc(0, CFG.low, "var(--low)"));
+  g.appendChild(arc(CFG.low, CFG.high, "var(--med)"));
+  g.appendChild(arc(CFG.high, 1, "var(--high)"));
+  const pc = (v) => Math.round(v * 100) + "%";
+  $("#legend").innerHTML = `<span><i style="background:var(--low)"></i>Low &lt; ${pc(CFG.low)}</span><span><i style="background:var(--med)"></i>Medium ${pc(CFG.low)}–${pc(CFG.high)}</span><span><i style="background:var(--high)"></i>High ≥ ${pc(CFG.high)}</span>`;
+  $("#thresholdNote").textContent = `Risk limits: Low below ${pc(CFG.low)}, High from ${pc(CFG.high)}`;
+}
+
+/* ---------- checker ---------- */
+const PRESETS = {
+  usual: { amount: 450, avg: 700, hour: 14, count: 1, loc: 0, type: "pos" },
+  large: { amount: 9000, avg: 800, hour: 15, count: 1, loc: 0, type: "online" },
+  burst: { amount: 35000, avg: 600, hour: 2, count: 6, loc: 1, type: "online" },
+};
+const state = { amount: 450, avg: 700, hour: 14, count: 1, loc: 0, type: "pos" };
+
+function hourLabel(h) {
+  const ap = h < 12 ? "AM" : "PM", h12 = h % 12 === 0 ? 12 : h % 12;
+  const tag = h >= 23 || h <= 4 ? " · late night" : "";
+  return `${h12}:00 ${ap}${tag}`;
+}
+function syncForm() {
+  $("#amount").value = state.amount; $("#avg").value = state.avg;
+  $("#hour").value = state.hour; $("#hourOut").textContent = hourLabel(state.hour);
+  $("#cOut").textContent = state.count;
+  document.querySelectorAll("#locSeg button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.v) === state.loc)));
+  document.querySelectorAll("#typeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === state.type)));
+}
+
+let timer = null, seq = 0;
+function schedule() { clearTimeout(timer); timer = setTimeout(predict, 120); }
+async function predict() {
+  const mine = ++seq;
+  const body = { amount: state.amount, avg_spending: state.avg, hour: state.hour, txn_count_1h: state.count, new_location: state.loc, txn_type: state.type };
+  try {
+    const res = await fetch("/api/predict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const out = await res.json();
+    if (mine !== seq) return;
+    if (!res.ok) { $("#err").textContent = (out.details || [out.error]).join(". "); return; }
+    $("#err").textContent = "";
+    showResult(out);
+  } catch (e) {
+    if (mine === seq) $("#err").textContent = "Could not reach the prediction service. Please try again.";
+  }
+}
+function showResult(r) {
+  $("#needle").style.transform = `rotate(${r.fraud_probability * 180}deg)`;
+  const b = $("#badge"); b.className = "badge " + r.risk_level; b.textContent = r.risk_level + " risk";
+  $("#probOut").textContent = (r.fraud_probability * 100).toFixed(1) + "%";
+  $("#signals").innerHTML = r.signals.map((s) => `<li><span class="ic ${s.tone}" aria-hidden="true">${s.tone === "ok" ? "✓" : s.tone === "warn" ? "!" : "✕"}</span><span>${s.text}</span></li>`).join("");
+}
+
+function bindForm() {
+  const num = (id, key) => $(id).addEventListener("input", (e) => { state[key] = Number(e.target.value); schedule(); });
+  num("#amount", "amount"); num("#avg", "avg");
+  $("#hour").addEventListener("input", (e) => { state.hour = Number(e.target.value); $("#hourOut").textContent = hourLabel(state.hour); schedule(); });
+  $("#cMinus").onclick = () => { state.count = Math.max(1, state.count - 1); $("#cOut").textContent = state.count; schedule(); };
+  $("#cPlus").onclick = () => { state.count = Math.min(10, state.count + 1); $("#cOut").textContent = state.count; schedule(); };
+  document.querySelectorAll("#locSeg button").forEach((b) => b.onclick = () => { state.loc = Number(b.dataset.v); syncForm(); schedule(); });
+  document.querySelectorAll("#typeSeg button").forEach((b) => b.onclick = () => { state.type = b.dataset.v; syncForm(); schedule(); });
+  document.querySelectorAll("[data-preset]").forEach((b) => b.onclick = () => { Object.assign(state, PRESETS[b.dataset.preset]); syncForm(); predict(); });
+}
+
+/* ---------- start ---------- */
+(async function init() {
+  try { const r = await fetch("/api/config"); if (r.ok) CFG = Object.assign(CFG, await r.json()); } catch (e) {}
+  $("#modelPill").textContent = CFG.model;
+  if (CFG.env) { const p = $("#envPill"); p.textContent = CFG.env; p.hidden = false; }
+  drawGauge(); syncForm(); bindForm(); predict();
+  try {
+    DATA = await (await fetch("/data.json")).json();
+    renderKpis(DATA); renderCharts(DATA);
+  } catch (e) { $("#kpis").innerHTML = '<div class="card">Could not load the dashboard data.</div>'; }
+})();
+</script>
+</body>
+</html>
